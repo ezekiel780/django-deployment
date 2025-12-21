@@ -16,3 +16,22 @@ venv/
 
 # Local PostgreSQL data
 data/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.pytest_cache/
+node_modules/
+dist/
+build/
+.DS_Store
+.idea
+.vscode
+.env
+credentials/
+**/data/web/*
+Dockerfile
+docker-compose.override.yml

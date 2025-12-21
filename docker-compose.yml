@@ -1,7 +1,10 @@
+version: '3.9'
+
 services:
   api:
     build:
       context: .
+    env_file: .env
     command: >
       sh -c "python manage.py react &&
              python manage.py migrate &&
@@ -12,15 +15,77 @@ services:
       - ./api:/api
       - ./data/web:/vol/web
     environment:
-      - SECRET_KEY=${SECRET_KEY}
       - DEBUG=1
       - DB_HOST=db
-      - DB_NAME=lipschitz_db
-      - DB_USER=lipschitz_user
-      - DB_PASSWORD=Lagrangian2024!
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    networks:
+      - web
+
   db:
     image: postgres:14-alpine
+    env_file: .env
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - web
+
+  # nginx - Only uncomment if you need to test SSL/nginx locally
+  # For local development, access Django directly at http://127.0.0.1:8000
+  # nginx:
+  #   image: nginx:stable-alpine
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - ./data/web:/vol/web:ro
+  #     - ./certs:/etc/letsencrypt:ro
+  #     - ./certs/www:/var/www/certbot:rw
+  #   depends_on:
+  #     - api
+  #   networks:
+  #     - web
+  
+  # certbot - Only needed when testing SSL locally
+  # certbot:
+  #   image: certbot/certbot
+  #   restart: "no"
+  #   volumes:
+  #     - ./certs:/etc/letsencrypt
+  #     - ./certs/www:/var/www/certbot
+  #   entrypoint: ["/bin/sh","-c"]
+  #   command: ["certbot certonly --webroot -w /var/www/certbot --cert-name lipschitz -d ${DOMAIN} --email ${LETSENCRYPT_EMAIL} --agree-tos --non-interactive || true"]
+  
+  # certbot-renew:
+  #   image: certbot/certbot
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./certs:/etc/letsencrypt
+  #     - ./certs/www:/var/www/certbot
+  #   entrypoint: ["/bin/sh","-c"]
+  #   command: ["trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait ${!}; done"]
+
 volumes:
   postgres_data:
+
+networks:
+  web:
+    driver: bridge
+
+    
