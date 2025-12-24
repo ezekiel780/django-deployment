@@ -9,7 +9,9 @@ services:
         env_file: .env.prod
         environment:
             - DEBUG=0
-            - DB_HOST=db  # Explicitly set to use service name
+            - DB_HOST=db
+        ports:
+            - "8000:8000"  # Direct access to app
         depends_on:
             db:
                 condition: service_healthy
@@ -20,18 +22,14 @@ services:
             - web
         labels:
             - "traefik.enable=true"
-            # HTTP router (redirect to HTTPS)
             - "traefik.http.routers.lipschitz-http.rule=Host(`${DOMAIN}`)"
             - "traefik.http.routers.lipschitz-http.entrypoints=web"
             - "traefik.http.routers.lipschitz-http.middlewares=redirect-to-https"
-            # HTTPS router
             - "traefik.http.routers.lipschitz.rule=Host(`${DOMAIN}`)"
             - "traefik.http.routers.lipschitz.entrypoints=websecure"
             - "traefik.http.routers.lipschitz.tls=true"
             - "traefik.http.routers.lipschitz.tls.certresolver=le"
-            # Service
             - "traefik.http.services.lipschitz.loadbalancer.server.port=8000"
-            # Middleware for redirect
             - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
             - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
         healthcheck:
@@ -39,7 +37,7 @@ services:
             interval: 30s
             timeout: 10s
             retries: 5
-            start_period: 40s  # Give app time to start
+            start_period: 40s
 
     db:
         image: postgres:14-alpine
@@ -70,15 +68,14 @@ services:
             - --api.insecure=false
             - --providers.docker=true
             - --providers.docker.exposedbydefault=false
+            - --providers.docker.endpoint=npipe:////./pipe/docker_engine
             - --entrypoints.web.address=:80
             - --entrypoints.websecure.address=:443
             - --certificatesresolvers.le.acme.tlschallenge=true
             - --certificatesresolvers.le.acme.email=${LETSENCRYPT_EMAIL}
             - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
-            # Uncomment for testing/staging
-            # - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
         volumes:
-            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - //./pipe/docker_engine://./pipe/docker_engine
             - traefik_letsencrypt:/letsencrypt
         networks:
             - web
@@ -91,5 +88,3 @@ volumes:
 networks:
     web:
         driver: bridge
-
-        

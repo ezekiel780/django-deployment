@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'core',
+    'apiApp',
+
 ]
 
 MIDDLEWARE = [
@@ -127,11 +129,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/static/'
-MEDIA_URL = '/static/media/'
+STATIC_URL = 'static/'
+MEDIA_URL = 'media/'
+
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 MEDIA_ROOT = '/vol/web/media/'
 STATIC_ROOT = '/vol/web/static/'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'apiApp.CustomUser'
