@@ -7,8 +7,10 @@ from django.utils.text import slugify
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     profile_picture = models.URLField(blank=True, null=True)
+    
     def __str__(self):
         return self.username
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -18,7 +20,7 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-
+    
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
@@ -30,6 +32,7 @@ class Category(models.Model):
             self.slug = unique_slug
         super().save(*args, **kwargs)
 
+
 class Product(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -38,7 +41,6 @@ class Product(models.Model):
     image = models.ImageField(upload_to='product_img', blank=True, null=True)
     featured = models.BooleanField(default=False)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='products', null=True, blank=True)
-
 
     def __str__(self):
         return self.name
@@ -53,6 +55,7 @@ class Product(models.Model):
                 counter += 1
             self.slug = unique_slug
         super().save(*args, **kwargs)
+
 
 class Cart(models.Model):
     cart_code = models.CharField(max_length=11, unique=True)
@@ -69,10 +72,10 @@ class CartItem(models.Model):
     quantity = models.IntegerField(default=1)
 
     def __str__(self):
-        return f"{self.quantity} x {self.product.name} in cart {self.cart.cart_code}" 
+        return f"{self.quantity} x {self.product.name} in cart {self.cart.cart_code}"
+
 
 class Review(models.Model):
-
     RATING_CHOICES = [
         (1, '1 = poor'),
         (2, '2 = fair'),
@@ -80,6 +83,7 @@ class Review(models.Model):
         (4, '4 = very good'),
         (5, '5 = excellent'),
     ]
+    
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')
     rating = models.IntegerField(choices=RATING_CHOICES)
@@ -93,4 +97,4 @@ class Review(models.Model):
     class Meta:
         unique_together = ['user', 'product']
         ordering = ['-created_at']
-
+        
