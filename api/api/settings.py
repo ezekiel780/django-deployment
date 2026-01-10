@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ.get('DEBUG', 0)))
+DEBUG = bool(int(os.environ.get('DEBUG', 1)))
 
 ALLOWED_HOSTS = []
 
@@ -32,6 +32,10 @@ ALLOWED_HOSTS.extend(
     for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
     if host.strip()
 )
+
+# If DEBUG is True and ALLOWED_HOSTS is empty, add localhost for development
+if DEBUG and not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 
@@ -86,11 +90,11 @@ WSGI_APPLICATION = 'api.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT', 5432),
+        'NAME': os.environ.get('DB_NAME', 'lipschitz_db'),
+        'USER': os.environ.get('DB_USER', 'lipschitz_user'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'lipschitz_password'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 

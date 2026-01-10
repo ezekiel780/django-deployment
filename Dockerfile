@@ -1,4 +1,4 @@
-FROM python:3.14-slim
+FROM python:3.11-slim
 LABEL maintainer="lipschitzappdeveloper.com"
 
 ENV PYTHONUNBUFFERED=1
@@ -19,11 +19,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/* && \
     adduser --disabled-password --gecos "" app && \
     mkdir -p /home/app/app/staticfiles /home/app/app/mediafiles /vol /vol/web && \
-    chown -R app:app /home/app /vol /Scripts && \
+    chown -R app:app /home/app /vol /Scripts /api && \
     chmod -R 755 /vol /Scripts && \
     chmod +x /Scripts/*.sh
+
 ENV PATH="/py/bin:$PATH"
 
-ENTRYPOINT ["/Scripts/entrypoint.sh"]
-
 USER app
+
+ENTRYPOINT ["/Scripts/entrypoint.sh"]

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 # Run migrations and collect static files (non-interactive)
@@ -9,6 +9,5 @@ python manage.py collectstatic --noinput
 if [ "$1" != "" ]; then
   exec "$@"
 else
-  exec /bin/sh /Scripts/gunicorn_start.sh
+  exec /Scripts/gunicorn_start.sh
 fi
-
