@@ -5,3 +5,5 @@ tzdata==2025.3
 psycopg[binary]
 gunicorn
 Pillow>=10.0.0
+celery>=5.3
+redis>=5.0
